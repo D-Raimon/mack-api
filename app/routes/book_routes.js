@@ -22,6 +22,15 @@ router.get('/books', (req, res, next) => {
     .catch(next)
 })
 
+router.get('/books/:id', (req, res, next) => {
+  Book.findById(req.params.id)
+    .then(handle404)
+    .then(book => {
+      return res.status(200).json({ book: book.toObject() })
+    })
+    .catch(next)
+})
+
 router.post('/books', requireToken, (req, res, next) => {
   req.body.book.owner = req.user.id
 
