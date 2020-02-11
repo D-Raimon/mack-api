@@ -3,9 +3,9 @@ const passport = require('passport')
 
 const Book = require('../models/book')
 
-// const customErrors = require('../../lib/custom_errors')
-// const requireOwnership = customErrors.requireOwnership
-// const handle404 = customErrors.handle404
+const customErrors = require('../../lib/custom_errors')
+const requireOwnership = customErrors.requireOwnership
+const handle404 = customErrors.handle404
 
 // const removeBlanks = require('../../lib/remove_blank_fields')
 
@@ -27,6 +27,17 @@ router.post('/books', requireToken, (req, res, next) => {
 
   Book.create(req.body.book)
     .then(book => res.status(201).json({ book: book.toObject() }))
+    .catch(next)
+})
+
+router.delete('/books/:id', requireToken, (req, res, next) => {
+  Book.findById(req.params.id)
+    .then(handle404)
+    .then(book => {
+      requireOwnership(req, book)
+      book.deleteOne()
+    })
+    .then(() => res.sendStatus(204))
     .catch(next)
 })
 
